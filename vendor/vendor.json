@@ -1,0 +1,91 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "pPH/BoINXxzYDObljpsGZbysMrw=",
+			"path": "github.com/BurntSushi/toml",
+			"revision": "b26d9c308763d68093482582cea63d69be07a0f0",
+			"revisionTime": "2017-03-28T06:15:53Z"
+		},
+		{
+			"checksumSHA1": "+TxLjulcQZ4FA8ElcNhHf4CSw/4=",
+			"path": "github.com/coder-van/v-stats",
+			"revision": "ed72b282e7d1603252aafe3d98de9d6f8c53adaa",
+			"revisionTime": "2017-05-11T04:04:43Z"
+		},
+		{
+			"checksumSHA1": "0O+JfVgauBxCc6WFHdo999+ULfg=",
+			"path": "github.com/coder-van/v-stats/backends",
+			"revision": "ed72b282e7d1603252aafe3d98de9d6f8c53adaa",
+			"revisionTime": "2017-05-11T04:04:43Z"
+		},
+		{
+			"checksumSHA1": "lwz5J6TB8ykNPLcn/Bz+pP8E4JM=",
+			"path": "github.com/coder-van/v-stats/backends/graghite",
+			"revision": "ed72b282e7d1603252aafe3d98de9d6f8c53adaa",
+			"revisionTime": "2017-05-11T04:04:43Z"
+		},
+		{
+			"checksumSHA1": "raYvJ/bELfhcjC5XWH+SGQYadpQ=",
+			"path": "github.com/coder-van/v-stats/metrics",
+			"revision": "1f30fe9094a513ce4c700b9a54458bbb0c96996c",
+			"revisionTime": "2016-11-28T21:05:44Z"
+		},
+		{
+			"checksumSHA1": "xhBPCwqq380tVa37YvHvFogfg3U=",
+			"path": "github.com/coder-van/v-util/log",
+			"revision": "6663f8d39162685b7f6ce0811596b454202dfaed",
+			"revisionTime": "2017-05-11T03:57:32Z"
+		},
+		{
+			"checksumSHA1": "p3bbaoDIiXJ9Vr1EFZD81HrGEpY=",
+			"path": "github.com/shirou/gopsutil/cpu",
+			"revision": "b6da2bd76e7d66a228181f7993265cf859d5351f",
+			"revisionTime": "2017-05-10T02:47:26Z"
+		},
+		{
+			"checksumSHA1": "cOFRatm8GXnsobJDRYrB4yZB+VQ=",
+			"path": "github.com/shirou/gopsutil/disk",
+			"revision": "b6da2bd76e7d66a228181f7993265cf859d5351f",
+			"revisionTime": "2017-05-10T02:47:26Z"
+		},
+		{
+			"checksumSHA1": "RpugWm8Lt3GKy4muFL/aDPjleLU=",
+			"path": "github.com/shirou/gopsutil/host",
+			"revision": "b6da2bd76e7d66a228181f7993265cf859d5351f",
+			"revisionTime": "2017-05-10T02:47:26Z"
+		},
+		{
+			"checksumSHA1": "fhoqQ83pFoTsSxKsCW8i+vGEk1M=",
+			"path": "github.com/shirou/gopsutil/internal/common",
+			"revision": "b6da2bd76e7d66a228181f7993265cf859d5351f",
+			"revisionTime": "2017-05-10T02:47:26Z"
+		},
+		{
+			"checksumSHA1": "jB8En6qWQ7G2yPJey4uY1FvOjWM=",
+			"path": "github.com/shirou/gopsutil/load",
+			"revision": "b6da2bd76e7d66a228181f7993265cf859d5351f",
+			"revisionTime": "2017-05-10T02:47:26Z"
+		},
+		{
+			"checksumSHA1": "zkNNauN735M7Jghr+MsARbb+/xQ=",
+			"path": "github.com/shirou/gopsutil/mem",
+			"revision": "b6da2bd76e7d66a228181f7993265cf859d5351f",
+			"revisionTime": "2017-05-10T02:47:26Z"
+		},
+		{
+			"checksumSHA1": "PlxW30vgwONYKSGsvqiXWyOAjI4=",
+			"path": "github.com/shirou/gopsutil/net",
+			"revision": "b6da2bd76e7d66a228181f7993265cf859d5351f",
+			"revisionTime": "2017-05-10T02:47:26Z"
+		},
+		{
+			"checksumSHA1": "6RJMlwHCIIZDDUL4nKPgNaqHC48=",
+			"path": "github.com/shirou/gopsutil/process",
+			"revision": "b6da2bd76e7d66a228181f7993265cf859d5351f",
+			"revisionTime": "2017-05-10T02:47:26Z"
+		}
+	],
+	"rootPath": "github.com/coder-van/v-collect"
+}
