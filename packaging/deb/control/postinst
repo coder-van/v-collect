@@ -1,0 +1,75 @@
+#!/bin/sh
+
+set -e
+
+[ -f /etc/default/v-collect-server ] && . /etc/default/v-collect-server
+
+IS_UPGRADE=false
+
+case "$1" in
+	configure)
+	[ -z "$GRAFANA_USER" ] && GRAFANA_USER="v"
+	[ -z "$GRAFANA_GROUP" ] && GRAFANA_GROUP="v"
+	if ! getent group "$GRAFANA_GROUP" > /dev/null 2>&1 ; then
+	    addgroup --system "$GRAFANA_GROUP" --quiet
+	fi
+	if ! id $GRAFANA_USER > /dev/null 2>&1 ; then
+	    adduser --system --home /usr/share/v-collect --no-create-home \
+		--ingroup "$GRAFANA_GROUP" --disabled-password --shell /bin/false \
+		"$GRAFANA_USER"
+	fi
+
+	# Set user permissions on /var/log/v-collect, /var/lib/v-collect
+	mkdir -p /var/log/v-collect /var/lib/v-collect
+	chown -R $GRAFANA_USER:$GRAFANA_GROUP /var/log/v-collect /var/lib/v-collect
+	chmod 755 /var/log/v-collect /var/lib/v-collect
+
+  # copy user config files
+  if [ ! -f $CONF_FILE ]; then
+    cp /usr/share/v-collect/conf/sample.ini $CONF_FILE
+    cp /usr/share/v-collect/conf/ldap.toml /etc/v-collect/ldap.toml
+  fi
+
+	# configuration files should not be modifiable by v user, as this can be a security issue
+	chown -Rh root:$GRAFANA_GROUP /etc/v-collect/*
+	chmod 755 /etc/v-collect
+	find /etc/v-collect -type f -exec chmod 640 {} ';'
+	find /etc/v-collect -type d -exec chmod 755 {} ';'
+
+  # If $1=configure and $2 is set, this is an upgrade
+  if [ "$2" != "" ]; then
+    IS_UPGRADE=true
+  fi
+
+  if [ "x$IS_UPGRADE" != "xtrue" ]; then
+    if command -v systemctl >/dev/null; then
+      echo "### NOT starting on installation, please execute the following statements to configure v-collect to start automatically using systemd"
+      echo " sudo /bin/systemctl daemon-reload"
+      echo " sudo /bin/systemctl enable v-collect-server"
+      echo "### You can start v-collect-server by executing"
+      echo " sudo /bin/systemctl start v-collect-server"
+    elif command -v update-rc.d >/dev/null; then
+      echo "### NOT starting v-collect-server by default on bootup, please execute"
+      echo " sudo update-rc.d v-collect-server defaults 95 10"
+      echo "### In order to start v-collect-server, execute"
+      echo " sudo service v-collect-server start"
+    fi
+  elif [ "$RESTART_ON_UPGRADE" = "true" ]; then
+
+    echo -n "Restarting v-collect-server service..."
+
+    if command -v systemctl >/dev/null; then
+      systemctl daemon-reload
+      systemctl restart v-collect-server || true
+    elif [ -x /etc/init.d/v-collect-server ]; then
+      if command -v invoke-rc.d >/dev/null; then
+        invoke-rc.d v-collect-server restart || true
+      else
+        /etc/init.d/v-collect-server restart || true
+      fi
+    fi
+    echo " OK"
+
+	fi
+	;;
+esac
