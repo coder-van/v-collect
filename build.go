@@ -29,19 +29,18 @@ var (
 	gocxx     string
 	cgo       string
 	pkgArch   string
-	version   string = "v1"
+	version   string = "1.0.1-alph"
 	// deb & rpm does not support semver so have to handle their version a little differently
-	linuxPackageVersion   string = "v1"
+	linuxPackageVersion   string = "1.0.1-alph"
 	linuxPackageIteration string = ""
 	race                  bool
 	// phjsToRelease         string
-	workingDir            string
-	includeBuildNumber    bool     = true
-	buildNumber           int      = 0
-	// binaries              []string = []string{"v-collect-server"}
-	binaryName           string   = "v-collect"
-	packPrefix           string   = "v-collect-linux-pack"
-	packageRoot, _       = ioutil.TempDir("", packPrefix)
+	workingDir         string
+	includeBuildNumber bool = true
+	buildNumber        int  = 0
+	binaryName     string = "v-collect"
+	packPrefix     string = "v-collect-linux-pack"
+	packageRoot, _        = ioutil.TempDir("", packPrefix)
 )
 
 const minGoVersion = 1.8
@@ -82,8 +81,8 @@ func main() {
 
 		case "build":
 			clean()
-			build(binaryName, "./server", []string{})
-			
+			build(binaryName, "./src", []string{})
+
 		case "test":
 			test("./pkg/...")
 
@@ -160,14 +159,14 @@ func createDebPackages() {
 		binPath:                "/usr/sbin",
 		configDir:              replaceBinaryName("/etc/%s"),
 		etcDefaultPath:         "/etc/default",
-		etcDefaultFilePath:     replaceBinaryName("/etc/sysconfig/%s-server"),
-		initdScriptFilePath:    replaceBinaryName("/etc/init.d/%s-server"),
-		systemdServiceFilePath: replaceBinaryName("/usr/lib/systemd/system/%s-server.service"),
+		etcDefaultFilePath:     replaceBinaryName("/etc/default/%s"),
+		initdScriptFilePath:    replaceBinaryName("/etc/init.d/%s"),
+		systemdServiceFilePath: replaceBinaryName("/usr/lib/systemd/system/%s.service"),
 
 		postinstSrc:    "packaging/deb/control/postinst",
-		initdScriptSrc: "packaging/deb/init.d/v-collect-server",
-		defaultFileSrc: "packaging/deb/default/v-collect-server",
-		systemdFileSrc: "packaging/deb/systemd/v-collect-server.service",
+		initdScriptSrc: "packaging/deb/init.d/v-collect",
+		defaultFileSrc: "packaging/deb/default/v-collect",
+		systemdFileSrc: "packaging/deb/systemd/v-collect.service",
 
 		depends: []string{"adduser", "libfontconfig"},
 	})
@@ -180,14 +179,14 @@ func createRpmPackages() {
 		binPath:                "/usr/sbin",
 		configDir:              replaceBinaryName("/etc/%s"),
 		etcDefaultPath:         "/etc/sysconfig",
-		etcDefaultFilePath:     replaceBinaryName("/etc/sysconfig/%s-server"),
-		initdScriptFilePath:    replaceBinaryName("/etc/init.d/%s-server"),
-		systemdServiceFilePath: replaceBinaryName("/usr/lib/systemd/system/%s-server.service"),
+		etcDefaultFilePath:     replaceBinaryName("/etc/sysconfig/%s"),
+		initdScriptFilePath:    replaceBinaryName("/etc/init.d/%s"),
+		systemdServiceFilePath: replaceBinaryName("/usr/lib/systemd/system/%s.service"),
 
 		postinstSrc:    "packaging/rpm/control/postinst",
-		initdScriptSrc: "packaging/rpm/init.d/v-collect-server",
-		defaultFileSrc: "packaging/rpm/sysconfig/v-collect-server",
-		systemdFileSrc: "packaging/rpm/systemd/v-collect-server.service",
+		initdScriptSrc: "packaging/rpm/init.d/v-collect",
+		defaultFileSrc: "packaging/rpm/sysconfig/v-collect",
+		systemdFileSrc: "packaging/rpm/systemd/v-collect.service",
 
 		depends: []string{"/sbin/service", "fontconfig"},
 	})
@@ -198,36 +197,17 @@ func createLinuxPackages() {
 	createRpmPackages()
 }
 
-func replaceBinaryName(str string)  string {
+func replaceBinaryName(str string) string {
 	return fmt.Sprintf(str, binaryName)
 }
 
-func cp(src , dist string)  {
-	runPrint("cp", "-p", src, dist)
-}
-
-func rm(dir string)  {
-	runPrint("rm", "-rf", dir)
-}
-
-
-func mkdir(dir string)  {
-	runPrint("mkdir", "-p", dir)
-}
-
-func mkdirs(dirs... string)  {
-	for _, dir := range dirs {
-		mkdir(dir)
-	}
-}
-
-func join(fp string)  string {
-	return filepath.Join(packageRoot, fp)
-}
-
 func createPackage(options linuxPackageOptions) {
+	// mkdir tmp and copy bin conf to tmp
+	mkdirs("tmp", "dist")
+	cpr(filepath.Join(workingDir, "bin"), filepath.Join(workingDir, "tmp"))
+	cpr(filepath.Join(workingDir, "conf"), filepath.Join(workingDir, "tmp"))
 
-    dirs := []string{
+	dirs := []string{
 		join(options.homeDir),
 		join(options.configDir),
 		join("/etc/init.d"),
@@ -236,7 +216,7 @@ func createPackage(options linuxPackageOptions) {
 		join("/usr/sbin"),
 	}
 	mkdirs(dirs...)
-	
+
 	// copy binary
 	cp(filepath.Join(workingDir, "tmp/bin/"+binaryName), join("/usr/sbin/"+binaryName))
 	// copy init.d script
@@ -246,15 +226,16 @@ func createPackage(options linuxPackageOptions) {
 	// copy systemd file
 	cp(options.systemdFileSrc, join(options.systemdServiceFilePath))
 	// copy release files
-	cp(filepath.Join(workingDir, "tmp")+"/.", join(options.homeDir))
+	cpr(filepath.Join(workingDir, "tmp/bin"), join(options.homeDir))
+	cpr(filepath.Join(workingDir, "tmp/conf"), join(options.homeDir))
 	// remove bin path
 	rm(filepath.Join(packageRoot, options.homeDir, "bin"))
 
 	args := []string{
 		"-s", "dir",
-		"--description", "Grafana",
+		"--description", "v-collect",
 		"-C", packageRoot,
-		"--vendor", "Grafana",
+		"--vendor", "v-collect",
 		"--url", "https://v-collect.com",
 		"--license", "\"Apache 2.0\"",
 		"--maintainer", "contact@v-collect.com",
@@ -264,7 +245,7 @@ func createPackage(options linuxPackageOptions) {
 		"--after-install", options.postinstSrc,
 		"--name", "v-collect",
 		"--version", linuxPackageVersion,
-		"-p", "./dist",
+		"-p", "./dist/",
 	}
 
 	if options.packageType == "rpm" {
@@ -293,8 +274,6 @@ func createPackage(options linuxPackageOptions) {
 	fmt.Println("Creating package: ", options.packageType)
 	runPrint("fpm", append([]string{"-t", options.packageType}, args...)...)
 }
-
-
 
 func verifyGitRepoIsClean() {
 	rs, err := runError("git", "ls-files", "--modified")
@@ -326,10 +305,9 @@ func ensureGoPath() {
 //	os.Chdir(dir)
 //}
 
-
 func setup() {
 	runPrint("go", "get", "-v", "github.com/kardianos/govendor")
-	runPrint("go", "install", "-v", "./pkg/cmd/v-collect-server")
+	runPrint("go", "install", "-v", "./src")
 }
 
 func test(pkg string) {
@@ -376,6 +354,10 @@ func ldflags() string {
 	return b.String()
 }
 
+func join(fp string) string {
+	return filepath.Join(packageRoot, fp)
+}
+
 func rmr(paths ...string) {
 	for _, path := range paths {
 		log.Println("rm -r", path)
@@ -383,9 +365,30 @@ func rmr(paths ...string) {
 	}
 }
 
+func cpr(src, dist string) {
+	runPrint("cp", "-rp", src, dist)
+}
+
+func cp(src, dist string) {
+	runPrint("cp", "-p", src, dist)
+}
+
+func rm(dir string) {
+	runPrint("rm", "-rf", dir)
+}
+
+func mkdir(dir string) {
+	runPrint("mkdir", "-p", dir)
+}
+
+func mkdirs(dirs ...string) {
+	for _, dir := range dirs {
+		mkdir(dir)
+	}
+}
+
 func clean() {
-	rmr("dist")
-	rmr("tmp")
+	rmr("dist", "tmp")
 	rmr(filepath.Join(os.Getenv("GOPATH"), fmt.Sprintf("pkg/%s_%s/github.com/%s", goos, goarch, binaryName)))
 }
 
@@ -412,8 +415,8 @@ func setBuildEnv() {
 }
 
 func getGitSha() string {
-  // exe cmd git rev-parse --short HEAD
-  v, err := runError("git", "rev-parse", "--short", "HEAD")
+	// exe cmd git rev-parse --short HEAD
+	v, err := runError("git", "rev-parse", "--short", "HEAD")
 	if err != nil {
 		return "unknown-dev"
 	}
@@ -421,8 +424,8 @@ func getGitSha() string {
 }
 
 func buildStamp() int64 {
-  // exe cmd git show -s --format=%ct
-  bs, err := runError("git", "show", "-s", "--format=%ct")
+	// exe cmd git show -s --format=%ct
+	bs, err := runError("git", "show", "-s", "--format=%ct")
 	if err != nil {
 		return time.Now().Unix()
 	}

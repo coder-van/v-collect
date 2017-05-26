@@ -1,0 +1,20 @@
+[Unit]
+Description=v-collect instance
+Documentation=http://github.com/coder-van/v-collect
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+EnvironmentFile=/etc/sysconfig/v-collect
+User=v
+Group=v
+Type=simple
+Restart=on-failure
+WorkingDirectory=/usr/share/v-collect
+ExecStart=/usr/sbin/v-collect
+
+LimitNOFILE=10000
+TimeoutStopSec=20
+
+[Install]
+WantedBy=multi-user.target

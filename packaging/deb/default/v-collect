@@ -1,0 +1,12 @@
+# default config for server
+
+V_USER=v
+V_GROUP=v
+CONF_DIR=/etc/v-collect
+WORK_DIR=/usr/share/v-collect
+DATA_DIR=/var/lib/v-collect
+LOG_DIR=/var/log/v-collect
+CONF_FILE=$CONF_DIR/default.conf
+MAX_OPEN_FILES=10000
+PID_FILE=/var/run/$NAME.pid
+PROG=/usr/sbin/$NAME
