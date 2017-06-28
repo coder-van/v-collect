@@ -202,14 +202,10 @@ func replaceBinaryName(str string) string {
 }
 
 func createPackage(options linuxPackageOptions) {
-	// mkdir tmp and copy bin conf to tmp
-	mkdirs("tmp", "dist")
-	cpr(filepath.Join(workingDir, "bin"), filepath.Join(workingDir, "tmp"))
-	cpr(filepath.Join(workingDir, "conf"), filepath.Join(workingDir, "tmp"))
-
+	
 	dirs := []string{
+		"dist",
 		join(options.homeDir),
-		join(options.configDir),
 		join("/etc/init.d"),
 		join(options.etcDefaultPath),
 		join("/usr/lib/systemd/system"),
@@ -218,18 +214,15 @@ func createPackage(options linuxPackageOptions) {
 	mkdirs(dirs...)
 
 	// copy binary
-	cp(filepath.Join(workingDir, "tmp/bin/"+binaryName), join("/usr/sbin/"+binaryName))
+	cp(filepath.Join(workingDir, "bin/"+binaryName), join("/usr/sbin/"+binaryName))
 	// copy init.d script
 	cp(options.initdScriptSrc, join(options.initdScriptFilePath))
 	// copy environment var file
 	cp(options.defaultFileSrc, join(options.etcDefaultFilePath))
 	// copy systemd file
 	cp(options.systemdFileSrc, join(options.systemdServiceFilePath))
-	// copy release files
-	cpr(filepath.Join(workingDir, "tmp/bin"), join(options.homeDir))
-	cpr(filepath.Join(workingDir, "tmp/conf"), join(options.homeDir))
-	// remove bin path
-	rm(filepath.Join(packageRoot, options.homeDir, "bin"))
+	// copy config files
+	cpr(filepath.Join(workingDir, "conf"), join(options.configDir))
 
 	args := []string{
 		"-s", "dir",
